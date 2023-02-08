@@ -1,6 +1,17 @@
+/*
+
+Dovid 19 Data Exploration
+
+Skills used: Joins, CTE's, Temp Tables, Windows Functions, Aggregate Functions, Creating Views, Coverting Data Types
+
+*/
+
+
 SELECT * FROM PortfolioProject..CovidDeaths
 WHERE continent IS NOT NULL
 ORDER BY 3,4;
+
+-- Selecting data to start with
 
 SELECT location, date, total_cases, new_cases, total_deaths, population 
 FROM PortfolioProject..CovidDeaths
@@ -18,30 +29,28 @@ AND continent IS NOT NULL
 ORDER BY 1, 2;
 
 
--- Looking at the total cases vs the population
--- Shows what percentage of population got covid
+-- Total Cases vs Population
+-- Shows the percentage of population infected with covid
 
 SELECT location, date, population, total_cases,  (total_cases / population) * 100 AS PercentPopulationInfected
 FROM PortfolioProject..CovidDeaths
-WHERE continent IS NOT NULL
 ORDER BY 1, 2;
 
 
--- Looking at countries with highest infection rate compared to population
+-- Countries with highest infection rate compared to population
 
-SELECT continent, population, MAX(total_cases) AS HighestInfectionCount,  MAX((total_cases / population)) * 100 AS PercentPopulationInfected
+SELECT location, population, MAX(total_cases) AS HighestInfectionCount,  MAX((total_cases / population)) * 100 AS PercentPopulationInfected
 FROM PortfolioProject..CovidDeaths
-WHERE continent IS NOT NULL
-GROUP BY continent, population
+GROUP BY location, population
 ORDER BY PercentPopulationInfected DESC;
 
 
--- Showing countries with highest death count per population
+-- Countries with highest death count per population
 
-SELECT continent, MAX(CAST(total_deaths AS INT)) AS TotalDeathCount
+SELECT location, MAX(CAST(total_deaths AS INT)) AS TotalDeathCount
 FROM PortfolioProject..CovidDeaths
 WHERE continent IS NOT NULL
-GROUP BY continent
+GROUP BY location
 ORDER BY TotalDeathCount DESC;
 
 
@@ -71,8 +80,8 @@ FROM PortfolioProject..CovidDeaths
 WHERE continent IS NOT NULL
 ORDER BY 1, 2;
 
-
--- Joining two tables to look at total population vs vaccinations
+-- Total population vs Vaccinations
+-- Shows percentage of population that has recieved at least one covid vaccine
 
 SELECT dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations, SUM(CAST(vac.new_vaccinations AS INT)) 
 OVER (PARTITION BY dea.location ORDER BY dea.location, dea.date) AS RollingPeopleVaccinated
@@ -84,7 +93,7 @@ WHERE dea.continent IS NOT NULL
 ORDER BY 2, 3;
 
 
--- Use CTE
+-- Use CTE to perform calculation on partition by in previous query
 
 WITH PopvsVac (Continent, Location, Date, Population, New_Vaccinations, RollingPeopleVaccinated) AS 
 (
@@ -99,7 +108,7 @@ WHERE dea.continent IS NOT NULL
 SELECT *, (RollingPeopleVaccinated / Population) * 100 FROM PopvsVac;
 
 
--- Temp table
+-- Using temp table to perform calculation on partition by in previous query
 
 DROP TABLE IF EXISTS #PercentPopulationVaccinated
 CREATE TABLE #PercentPopulationVaccinated
@@ -119,7 +128,6 @@ FROM PortfolioProject..CovidDeaths dea
 INNER JOIN PortfolioProject..CovidVaccinations vac
 ON dea.location = vac.location
 AND dea.date = vac.date
---WHERE dea.continent IS NOT NULL
 
 SELECT *, (RollingPeopleVaccinated / Population) * 100 FROM #PercentPopulationVaccinated;
 
