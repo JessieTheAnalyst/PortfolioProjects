@@ -40,7 +40,7 @@ WHERE a.PropertyAddress IS NULL;
 -- Breaking out address Into Individual columns (Address, City, State)
 
 SELECT SUBSTRING(PropertyAddress, 1, CHARINDEX(',', PropertyAddress) - 1) AS Address,
-	   SUBSTRING(PropertyAddress, CHARINDEX(',', PropertyAddress) + 1, LEN(PropertyAddress)) AS Address
+       SUBSTRING(PropertyAddress, CHARINDEX(',', PropertyAddress) + 1, LEN(PropertyAddress)) AS Address
 FROM PortfolioProject.dbo.NashvilleHousing;
 
 
@@ -150,11 +150,4 @@ WHERE row_num > 1;
 
 ALTER TABLE PortfolioProject.dbo.NashvilleHousing
 DROP COLUMN OwnerAddress, TaxDistrict, PropertyAddress, SaleDate;
-
-
-
-
-
-
-
 
